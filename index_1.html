@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduCloud — Piattaforma E-Learning</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #1a56db;
+      --blue-dk: #1e429f;
+      --blue-lt: #e8f0fe;
+      --gray:    #6b7280;
+      --light:   #f9fafb;
+      --border:  #e5e7eb;
+      --white:   #ffffff;
+      --green:   #059669;
+      --amber:   #d97706;
+      --red:     #dc2626;
+    }
+
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--light); color: #111827; }
+
+    /* ── NAV ── */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: var(--blue); letter-spacing: -.5px; }
+    .logo span { color: #111827; }
+    .nav-btn {
+      background: var(--blue); color: #fff; border: none;
+      padding: .55rem 1.4rem; border-radius: 8px; font-size: .95rem;
+      font-weight: 600; cursor: pointer; transition: background .2s;
+    }
+    .nav-btn:hover { background: var(--blue-dk); }
+
+    /* ── PAGES ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1a56db 0%, #1e3a8a 100%);
+      color: #fff; text-align: center;
+      padding: 100px 2rem 80px;
+    }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; margin-bottom: 1rem; }
+    .hero p  { font-size: 1.15rem; opacity: .85; max-width: 540px; margin: 0 auto 2.5rem; }
+    .hero-btn {
+      background: #fff; color: var(--blue);
+      border: none; padding: .8rem 2.2rem;
+      border-radius: 10px; font-size: 1.05rem; font-weight: 700;
+      cursor: pointer; transition: transform .15s, box-shadow .15s;
+    }
+    .hero-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.15); }
+
+    /* ── FEATURES ── */
+    .features { padding: 72px 2rem; max-width: 960px; margin: 0 auto; text-align: center; }
+    .features h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: .6rem; }
+    .features > p { color: var(--gray); margin-bottom: 3rem; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+    .card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 14px; padding: 2rem 1.5rem; text-align: left;
+      transition: box-shadow .2s, transform .2s;
+    }
+    .card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-3px); }
+    .card-icon { font-size: 2rem; margin-bottom: 1rem; }
+    .card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .4rem; }
+    .card p  { font-size: .9rem; color: var(--gray); line-height: 1.5; }
+
+    /* ── LOGIN ── */
+    .login-wrap {
+      min-height: calc(100vh - 64px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #eff6ff 0%, #e8f0fe 100%);
+    }
+    .login-box {
+      background: var(--white); border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.1);
+      padding: 2.5rem; width: 100%; max-width: 420px;
+    }
+    .login-box h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: .3rem; }
+    .login-box p.sub { color: var(--gray); font-size: .9rem; margin-bottom: 2rem; }
+
+    .role-group { display: grid; grid-template-columns: repeat(3,1fr); gap: .6rem; margin-bottom: 1.6rem; }
+    .role-btn {
+      border: 2px solid var(--border); background: var(--white);
+      border-radius: 10px; padding: .8rem .4rem;
+      text-align: center; cursor: pointer; transition: all .15s;
+      font-size: .8rem; font-weight: 600; color: var(--gray);
+    }
+    .role-btn .r-icon { font-size: 1.6rem; display: block; margin-bottom: .3rem; }
+    .role-btn.selected { border-color: var(--blue); background: var(--blue-lt); color: var(--blue); }
+
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: .4rem; }
+    .field input {
+      width: 100%; padding: .7rem 1rem;
+      border: 1.5px solid var(--border); border-radius: 9px;
+      font-size: .95rem; outline: none; transition: border-color .2s;
+    }
+    .field input:focus { border-color: var(--blue); }
+
+    .login-submit {
+      width: 100%; background: var(--blue); color: #fff;
+      border: none; padding: .85rem; border-radius: 10px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: background .2s;
+    }
+    .login-submit:hover { background: var(--blue-dk); }
+    .back-link { display: block; text-align: center; margin-top: 1.2rem; font-size: .88rem; color: var(--blue); cursor: pointer; }
+
+    /* ── DASHBOARD COMMON ── */
+    .dash-layout { display: grid; grid-template-columns: 240px 1fr; min-height: calc(100vh - 64px); }
+    .sidebar {
+      background: var(--white); border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+    }
+    .sidebar-user { display: flex; align-items: center; gap: .7rem; margin-bottom: 2rem; padding: .8rem; background: var(--blue-lt); border-radius: 10px; }
+    .avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+    .user-info .name { font-weight: 700; font-size: .95rem; }
+    .user-info .role-tag { font-size: .75rem; color: var(--blue); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .65rem .9rem; border-radius: 9px;
+      font-size: .92rem; font-weight: 500; color: #374151;
+      cursor: pointer; transition: all .15s; margin-bottom: .2rem;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item:hover  { background: var(--light); color: var(--blue); }
+    .nav-item.active { background: var(--blue-lt); color: var(--blue); font-weight: 700; }
+    .nav-item .ni    { font-size: 1.1rem; }
+
+    .logout-btn {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .65rem .9rem; border-radius: 9px;
+      font-size: .92rem; font-weight: 500; color: var(--red);
+      cursor: pointer; margin-top: auto; border: none; background: none;
+      width: 100%; text-align: left; margin-top: 2rem;
+    }
+    .logout-btn:hover { background: #fee2e2; }
+
+    .dash-main { padding: 2rem; background: var(--light); overflow-y: auto; }
+    .dash-main h1 { font-size: 1.55rem; font-weight: 800; margin-bottom: .3rem; }
+    .dash-main .greeting { color: var(--gray); margin-bottom: 2rem; font-size: .95rem; }
+
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.2rem 1.4rem;
+    }
+    .stat-card .s-label { font-size: .8rem; color: var(--gray); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .4rem; }
+    .stat-card .s-val   { font-size: 2rem; font-weight: 800; color: #111827; }
+    .stat-card .s-sub   { font-size: .78rem; color: var(--gray); margin-top: .2rem; }
+
+    .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+    .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 2rem; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th { background: var(--light); padding: .75rem 1rem; text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--gray); border-bottom: 1px solid var(--border); }
+    td { padding: .75rem 1rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--light); }
+
+    .badge {
+      display: inline-block; padding: .2rem .65rem; border-radius: 20px;
+      font-size: .75rem; font-weight: 700;
+    }
+    .badge-green  { background: #d1fae5; color: var(--green); }
+    .badge-amber  { background: #fef3c7; color: var(--amber); }
+    .badge-blue   { background: var(--blue-lt); color: var(--blue); }
+    .badge-red    { background: #fee2e2; color: var(--red); }
+
+    .btn-sm {
+      padding: .35rem .85rem; border-radius: 7px; font-size: .8rem;
+      font-weight: 600; border: none; cursor: pointer;
+      background: var(--blue); color: #fff; transition: background .2s;
+    }
+    .btn-sm:hover { background: var(--blue-dk); }
+    .btn-sm.outline { background: none; border: 1.5px solid var(--blue); color: var(--blue); }
+
+    @media (max-width: 700px) {
+      .dash-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .role-group { grid-template-columns: 1fr 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="logo">Edu<span>Cloud</span></div>
+  <button class="nav-btn" onclick="show('login')">Accedi</button>
+</nav>
+
+<!-- ════════════════ HOMEPAGE ════════════════ -->
+<div id="page-home" class="page active">
+  <section class="hero">
+    <h1>La tua formazione,<br>sempre con te</h1>
+    <p>Corsi in streaming, esami online e certificati digitali — tutto in un'unica piattaforma cloud.</p>
+    <button class="hero-btn" onclick="show('login')">Accedi</button>
+  </section>
+
+  <section class="features">
+    <h2>Tutto quello che ti serve</h2>
+    <p>Una piattaforma pensata per studenti, docenti e amministratori</p>
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">🎥</div>
+        <h3>Video lezioni</h3>
+        <p>Accedi alle registrazioni e alle dirette in qualsiasi momento, da qualsiasi dispositivo.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📝</div>
+        <h3>Esami online</h3>
+        <p>Sostieni gli esami direttamente sulla piattaforma con correzione automatica immediata.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏆</div>
+        <h3>Certificati digitali</h3>
+        <p>Ottieni certificati verificabili al completamento di ogni percorso formativo.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <h3>Progressi in tempo reale</h3>
+        <p>Tieni traccia dei tuoi avanzamenti e dei risultati con statistiche dettagliate.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════ LOGIN ════════════════ -->
+<div id="page-login" class="page">
+  <div class="login-wrap">
+    <div class="login-box">
+      <h2>Benvenuto 👋</h2>
+      <p class="sub">Seleziona il tuo ruolo e accedi alla piattaforma</p>
+
+      <div class="role-group">
+        <div class="role-btn" id="role-studente" onclick="selectRole('studente')">
+          <span class="r-icon">🎓</span>Studente
+        </div>
+        <div class="role-btn" id="role-docente" onclick="selectRole('docente')">
+          <span class="r-icon">👨‍🏫</span>Docente
+        </div>
+        <div class="role-btn" id="role-admin" onclick="selectRole('admin')">
+          <span class="r-icon">⚙️</span>Admin
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email-input" placeholder="nome@esempio.it" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="pass-input" placeholder="••••••••" />
+      </div>
+
+      <button class="login-submit" onclick="doLogin()">Accedi</button>
+      <span class="back-link" onclick="show('home')">← Torna alla homepage</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ DASHBOARD STUDENTE ════════════════ -->
+<div id="page-dash-studente" class="page">
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="avatar">M</div>
+        <div class="user-info">
+          <div class="name">Mario Rossi</div>
+          <div class="role-tag">Studente</div>
+        </div>
+      </div>
+      <button class="nav-item active"><span class="ni">🏠</span> Dashboard</button>
+      <button class="nav-item"><span class="ni">📚</span> I miei corsi</button>
+      <button class="nav-item"><span class="ni">📝</span> Esami</button>
+      <button class="nav-item"><span class="ni">🏆</span> Certificati</button>
+      <button class="nav-item"><span class="ni">👤</span> Profilo</button>
+      <button class="logout-btn" onclick="logout()">🚪 Esci</button>
+    </aside>
+    <main class="dash-main">
+      <h1>Ciao, Mario! 👋</h1>
+      <p class="greeting">Ecco il riepilogo della tua formazione</p>
+
+      <div class="stats">
+        <div class="stat-card"><div class="s-label">Corsi attivi</div><div class="s-val">3</div><div class="s-sub">Su 5 iscritto</div></div>
+        <div class="stat-card"><div class="s-label">Ore completate</div><div class="s-val">24</div><div class="s-sub">+4 questa settimana</div></div>
+        <div class="stat-card"><div class="s-label">Esami superati</div><div class="s-val">2</div><div class="s-sub">Media: 28/30</div></div>
+        <div class="stat-card"><div class="s-label">Certificati</div><div class="s-val">1</div><div class="s-sub">Scaricabile</div></div>
+      </div>
+
+      <div class="section-title">I miei corsi</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Corso</th><th>Docente</th><th>Progresso</th><th>Stato</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Cloud Computing</td><td>Prof. Bianchi</td><td>75%</td><td><span class="badge badge-blue">In corso</span></td><td><button class="btn-sm">Continua</button></td></tr>
+            <tr><td>Cybersecurity</td><td>Prof. Verdi</td><td>40%</td><td><span class="badge badge-blue">In corso</span></td><td><button class="btn-sm">Continua</button></td></tr>
+            <tr><td>Python Avanzato</td><td>Prof. Neri</td><td>100%</td><td><span class="badge badge-green">Completato</span></td><td><button class="btn-sm outline">Certificato</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Prossimi esami</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Esame</th><th>Data</th><th>Durata</th><th>Stato</th></tr></thead>
+          <tbody>
+            <tr><td>Cloud Computing — Modulo 2</td><td>20 Gen 2025</td><td>60 min</td><td><span class="badge badge-amber">Da sostenere</span></td></tr>
+            <tr><td>Cybersecurity — Esame Finale</td><td>28 Gen 2025</td><td>90 min</td><td><span class="badge badge-amber">Da sostenere</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════ DASHBOARD DOCENTE ════════════════ -->
+<div id="page-dash-docente" class="page">
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="avatar">G</div>
+        <div class="user-info">
+          <div class="name">Giulia Bianchi</div>
+          <div class="role-tag">Docente</div>
+        </div>
+      </div>
+      <button class="nav-item active"><span class="ni">🏠</span> Dashboard</button>
+      <button class="nav-item"><span class="ni">📚</span> I miei corsi</button>
+      <button class="nav-item"><span class="ni">📝</span> Gestione esami</button>
+      <button class="nav-item"><span class="ni">👥</span> Studenti</button>
+      <button class="nav-item"><span class="ni">📊</span> Statistiche</button>
+      <button class="logout-btn" onclick="logout()">🚪 Esci</button>
+    </aside>
+    <main class="dash-main">
+      <h1>Ciao, Giulia! 📖</h1>
+      <p class="greeting">Gestisci i tuoi corsi e monitora gli studenti</p>
+
+      <div class="stats">
+        <div class="stat-card"><div class="s-label">Corsi attivi</div><div class="s-val">2</div><div class="s-sub">1 in diretta oggi</div></div>
+        <div class="stat-card"><div class="s-label">Studenti totali</div><div class="s-val">87</div><div class="s-sub">+12 questo mese</div></div>
+        <div class="stat-card"><div class="s-label">Esami da correggere</div><div class="s-val">5</div><div class="s-sub">Entro 3 giorni</div></div>
+        <div class="stat-card"><div class="s-label">Media voti</div><div class="s-val">27.4</div><div class="s-sub">Su 30</div></div>
+      </div>
+
+      <div class="section-title">I miei corsi</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Corso</th><th>Iscritti</th><th>Prossima lezione</th><th>Stato</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Cloud Computing</td><td>54</td><td>15 Gen — 10:00</td><td><span class="badge badge-green">Attivo</span></td><td><button class="btn-sm">Gestisci</button></td></tr>
+            <tr><td>Reti e Protocolli</td><td>33</td><td>17 Gen — 14:00</td><td><span class="badge badge-green">Attivo</span></td><td><button class="btn-sm">Gestisci</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Esami recenti — risultati</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Studente</th><th>Esame</th><th>Punteggio</th><th>Esito</th></tr></thead>
+          <tbody>
+            <tr><td>M. Rossi</td><td>Cloud — Modulo 1</td><td>28/30</td><td><span class="badge badge-green">Superato</span></td></tr>
+            <tr><td>L. Ferrari</td><td>Cloud — Modulo 1</td><td>22/30</td><td><span class="badge badge-green">Superato</span></td></tr>
+            <tr><td>A. Conti</td><td>Cloud — Modulo 1</td><td>15/30</td><td><span class="badge badge-red">Non superato</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════ DASHBOARD ADMIN ════════════════ -->
+<div id="page-dash-admin" class="page">
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="avatar">A</div>
+        <div class="user-info">
+          <div class="name">Admin</div>
+          <div class="role-tag">Amministratore</div>
+        </div>
+      </div>
+      <button class="nav-item active"><span class="ni">🏠</span> Dashboard</button>
+      <button class="nav-item"><span class="ni">👥</span> Utenti</button>
+      <button class="nav-item"><span class="ni">📚</span> Corsi</button>
+      <button class="nav-item"><span class="ni">📊</span> Report</button>
+      <button class="nav-item"><span class="ni">⚙️</span> Impostazioni</button>
+      <button class="logout-btn" onclick="logout()">🚪 Esci</button>
+    </aside>
+    <main class="dash-main">
+      <h1>Pannello Admin ⚙️</h1>
+      <p class="greeting">Panoramica della piattaforma</p>
+
+      <div class="stats">
+        <div class="stat-card"><div class="s-label">Utenti totali</div><div class="s-val">312</div><div class="s-sub">+23 questo mese</div></div>
+        <div class="stat-card"><div class="s-label">Corsi attivi</div><div class="s-val">18</div><div class="s-sub">3 in diretta oggi</div></div>
+        <div class="stat-card"><div class="s-label">Esami svolti</div><div class="s-val">148</div><div class="s-sub">Questo mese</div></div>
+        <div class="stat-card"><div class="s-label">Certificati emessi</div><div class="s-val">67</div><div class="s-sub">+15 questo mese</div></div>
+      </div>
+
+      <div class="section-title">Utenti recenti</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nome</th><th>Email</th><th>Ruolo</th><th>Registrato</th><th>Stato</th></tr></thead>
+          <tbody>
+            <tr><td>Mario Rossi</td><td>m.rossi@email.it</td><td><span class="badge badge-blue">Studente</span></td><td>10 Gen 2025</td><td><span class="badge badge-green">Attivo</span></td></tr>
+            <tr><td>Giulia Bianchi</td><td>g.bianchi@email.it</td><td><span class="badge badge-amber">Docente</span></td><td>5 Gen 2025</td><td><span class="badge badge-green">Attivo</span></td></tr>
+            <tr><td>Luca Ferrari</td><td>l.ferrari@email.it</td><td><span class="badge badge-blue">Studente</span></td><td>12 Gen 2025</td><td><span class="badge badge-green">Attivo</span></td></tr>
+            <tr><td>Anna Conti</td><td>a.conti@email.it</td><td><span class="badge badge-blue">Studente</span></td><td>13 Gen 2025</td><td><span class="badge badge-amber">In attesa</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title">Corsi più frequentati</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Corso</th><th>Docente</th><th>Iscritti</th><th>Completamento</th><th>Stato</th></tr></thead>
+          <tbody>
+            <tr><td>Cloud Computing</td><td>Prof. Bianchi</td><td>54</td><td>68%</td><td><span class="badge badge-green">Attivo</span></td></tr>
+            <tr><td>Python Avanzato</td><td>Prof. Neri</td><td>48</td><td>91%</td><td><span class="badge badge-green">Attivo</span></td></tr>
+            <tr><td>Cybersecurity</td><td>Prof. Verdi</td><td>41</td><td>44%</td><td><span class="badge badge-green">Attivo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  let selectedRole = null;
+
+  function show(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function selectRole(role) {
+    selectedRole = role;
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('role-' + role).classList.add('selected');
+  }
+
+  function doLogin() {
+    if (!selectedRole) { alert('Seleziona un ruolo prima di accedere'); return; }
+    const email = document.getElementById('email-input').value.trim();
+    const pass  = document.getElementById('pass-input').value.trim();
+    if (!email || !pass) { alert('Inserisci email e password'); return; }
+    show('dash-' + selectedRole);
+  }
+
+  function logout() {
+    selectedRole = null;
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('email-input').value = '';
+    document.getElementById('pass-input').value  = '';
+    show('home');
+  }
+</script>
+</body>
+</html>
