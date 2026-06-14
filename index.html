@@ -305,15 +305,13 @@
       <div class="table-wrap">
         <table>
           <thead><tr><th>Corso</th><th>Docente</th><th>Progresso</th><th>Stato</th><th></th></tr></thead>
-          <tbody>
-            <tr><td>Cloud Computing</td><td>Prof. Bianchi</td><td>75%</td><td><span class="badge badge-blue">In corso</span></td><td><button class="btn-sm">Continua</button></td></tr>
-            <tr><td>Cybersecurity</td><td>Prof. Verdi</td><td>40%</td><td><span class="badge badge-blue">In corso</span></td><td><button class="btn-sm">Continua</button></td></tr>
-            <tr><td>Python Avanzato</td><td>Prof. Neri</td><td>100%</td><td><span class="badge badge-green">Completato</span></td><td><button class="btn-sm outline">Certificato</button></td></tr>
+          <tbody id="tbody-corsi-studente">
+            <tr><td colspan="5" style="color:var(--gray)">Caricamento corsi...</td></tr>
           </tbody>
         </table>
       </div>
 
-      <div class="section-title">Prossimi esami</div>
+      
       <div class="table-wrap">
         <table>
           <thead><tr><th>Esame</th><th>Data</th><th>Durata</th><th>Stato</th></tr></thead>
@@ -359,10 +357,9 @@
       <div class="section-title">I miei corsi</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Corso</th><th>Iscritti</th><th>Prossima lezione</th><th>Stato</th><th></th></tr></thead>
-          <tbody>
-            <tr><td>Cloud Computing</td><td>54</td><td>15 Gen — 10:00</td><td><span class="badge badge-green">Attivo</span></td><td><button class="btn-sm">Gestisci</button></td></tr>
-            <tr><td>Reti e Protocolli</td><td>33</td><td>17 Gen — 14:00</td><td><span class="badge badge-green">Attivo</span></td><td><button class="btn-sm">Gestisci</button></td></tr>
+          <thead><tr><th>Corso</th><th>Lezioni</th><th>Durata</th><th>Stato</th><th></th></tr></thead>
+          <tbody id="tbody-corsi-docente">
+            <!-- Popolato da API /api/corsi -->
           </tbody>
         </table>
       </div>
@@ -370,11 +367,9 @@
       <div class="section-title">Esami recenti — risultati</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Studente</th><th>Esame</th><th>Punteggio</th><th>Esito</th></tr></thead>
-          <tbody>
-            <tr><td>M. Rossi</td><td>Cloud — Modulo 1</td><td>28/30</td><td><span class="badge badge-green">Superato</span></td></tr>
-            <tr><td>L. Ferrari</td><td>Cloud — Modulo 1</td><td>22/30</td><td><span class="badge badge-green">Superato</span></td></tr>
-            <tr><td>A. Conti</td><td>Cloud — Modulo 1</td><td>15/30</td><td><span class="badge badge-red">Non superato</span></td></tr>
+          <thead><tr><th>Studente</th><th>Corso</th><th>Punteggio</th><th>Esito</th></tr></thead>
+          <tbody id="tbody-risultati-docente">
+            <!-- Popolato da API /api/risultati -->
           </tbody>
         </table>
       </div>
@@ -427,11 +422,9 @@
       <div class="section-title">Corsi più frequentati</div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Corso</th><th>Docente</th><th>Iscritti</th><th>Completamento</th><th>Stato</th></tr></thead>
-          <tbody>
-            <tr><td>Cloud Computing</td><td>Prof. Bianchi</td><td>54</td><td>68%</td><td><span class="badge badge-green">Attivo</span></td></tr>
-            <tr><td>Python Avanzato</td><td>Prof. Neri</td><td>48</td><td>91%</td><td><span class="badge badge-green">Attivo</span></td></tr>
-            <tr><td>Cybersecurity</td><td>Prof. Verdi</td><td>41</td><td>44%</td><td><span class="badge badge-green">Attivo</span></td></tr>
+          <thead><tr><th>Corso</th><th>Docente</th><th>Livello</th><th>Stato</th></tr></thead>
+          <tbody id="tbody-corsi-admin">
+            <!-- Popolato da API /api/corsi -->
           </tbody>
         </table>
       </div>
@@ -439,9 +432,35 @@
   </div>
 </div>
 
+
+<!-- ════════════════ PAGINA ESAME ════════════════ -->
+<div id="page-dash-esame" class="page">
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="avatar">🎓</div>
+        <div class="user-info">
+          <div class="name">Esame in corso</div>
+          <div class="role-tag">Studente</div>
+        </div>
+      </div>
+      <button class="nav-item" onclick="show('dash-studente')"><span class="ni">←</span> Torna alla dashboard</button>
+    </aside>
+    <main class="dash-main">
+      <div id="esame-container">
+        <p>Caricamento esame...</p>
+      </div>
+    </main>
+  </div>
+</div>
+
 <script>
   let selectedRole = null;
+  let corsiData = [];
+  let currentUser = null;
+  let esameAttivo = null;
 
+  // ── NAVIGAZIONE ──
   function show(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
@@ -454,20 +473,192 @@
     document.getElementById('role-' + role).classList.add('selected');
   }
 
-  function doLogin() {
+  // ── LOGIN ──
+  async function doLogin() {
     if (!selectedRole) { alert('Seleziona un ruolo prima di accedere'); return; }
     const email = document.getElementById('email-input').value.trim();
     const pass  = document.getElementById('pass-input').value.trim();
     if (!email || !pass) { alert('Inserisci email e password'); return; }
+
+    currentUser = { email, nome: email.split('@')[0], ruolo: selectedRole };
     show('dash-' + selectedRole);
+
+    // Carica i corsi dall'API reale
+    await caricaCorsi();
+
+    // Se studente, carica anche i risultati
+    if (selectedRole === 'studente') await caricaRisultati();
+    if (selectedRole === 'docente')  await caricaRisultatiDocente();
   }
 
   function logout() {
-    selectedRole = null;
+    selectedRole = null; currentUser = null; esameAttivo = null;
     document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('email-input').value = '';
     document.getElementById('pass-input').value  = '';
     show('home');
+  }
+
+  // ── API: CARICA CORSI ──
+  async function caricaCorsi() {
+    try {
+      const res = await fetch('/api/corsi');
+      const json = await res.json();
+      if (!json.success) return;
+      corsiData = json.data;
+      renderCorsi();
+    } catch (e) {
+      console.error('Errore caricamento corsi:', e);
+    }
+  }
+
+  function renderCorsi() {
+    // Aggiorna tabella corsi nella dashboard studente
+    const tbodyS = document.getElementById('tbody-corsi-studente');
+    if (tbodyS) {
+      tbodyS.innerHTML = corsiData.map(c => `
+        <tr>
+          <td>${c.titolo}</td>
+          <td>${c.docente}</td>
+          <td>${c.durata}</td>
+          <td><span class="badge badge-blue">In corso</span></td>
+          <td><button class="btn-sm" onclick="apriEsame(${c.id})">Sostieni esame</button></td>
+        </tr>`).join('');
+    }
+
+    // Aggiorna tabella corsi nella dashboard docente
+    const tbodyD = document.getElementById('tbody-corsi-docente');
+    if (tbodyD) {
+      tbodyD.innerHTML = corsiData.map(c => `
+        <tr>
+          <td>${c.titolo}</td>
+          <td>${c.lezioni.length} lezioni</td>
+          <td>${c.durata}</td>
+          <td><span class="badge badge-green">Attivo</span></td>
+          <td><button class="btn-sm">Gestisci</button></td>
+        </tr>`).join('');
+    }
+
+    // Aggiorna tabella corsi nella dashboard admin
+    const tbodyA = document.getElementById('tbody-corsi-admin');
+    if (tbodyA) {
+      tbodyA.innerHTML = corsiData.map(c => `
+        <tr>
+          <td>${c.titolo}</td>
+          <td>${c.docente}</td>
+          <td>${c.livello}</td>
+          <td><span class="badge badge-green">Attivo</span></td>
+        </tr>`).join('');
+    }
+  }
+
+  // ── ESAME ──
+  function apriEsame(corsoId) {
+    const corso = corsiData.find(c => c.id === corsoId);
+    if (!corso) return;
+    esameAttivo = { corso, risposte: [] };
+
+    const container = document.getElementById('esame-container');
+    container.innerHTML = `
+      <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:2rem;">
+        <h2 style="margin-bottom:.5rem">${corso.esame.titolo}</h2>
+        <p style="color:var(--gray);margin-bottom:1.5rem">${corso.esame.domande.length} domande</p>
+        ${corso.esame.domande.map((d, i) => `
+          <div style="margin-bottom:1.5rem;padding:1rem;background:var(--light);border-radius:10px;">
+            <p style="font-weight:600;margin-bottom:.8rem">${i+1}. ${d.testo}</p>
+            ${d.opzioni.map((op, j) => `
+              <label style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;cursor:pointer;">
+                <input type="radio" name="q${i}" value="${j}" onchange="salvaRisposta(${i}, ${j})"> ${op}
+              </label>`).join('')}
+          </div>`).join('')}
+        <button class="btn-sm" style="margin-top:1rem;padding:.7rem 2rem;font-size:1rem;" onclick="inviaEsame(${corso.id}, ${corso.esame.id})">
+          Invia esame
+        </button>
+      </div>`;
+
+    show('dash-esame');
+  }
+
+  function salvaRisposta(domandaIndex, rispostaIndex) {
+    esameAttivo.risposte[domandaIndex] = rispostaIndex;
+  }
+
+  async function inviaEsame(corsoId, esameId) {
+    if (!esameAttivo) return;
+    const totale = esameAttivo.corso.esame.domande.length;
+    if (esameAttivo.risposte.filter(r => r !== undefined).length < totale) {
+      alert('Rispondi a tutte le domande prima di inviare!'); return;
+    }
+
+    try {
+      const res = await fetch('/api/risultati', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studenteId: currentUser.email,
+          studenteNome: currentUser.nome,
+          corsoId,
+          esameId,
+          risposte: esameAttivo.risposte
+        })
+      });
+      const json = await res.json();
+      if (!json.success) { alert('Errore nell\'invio dell\'esame'); return; }
+
+      const esito = json.superato ? '✅ SUPERATO' : '❌ NON SUPERATO';
+      alert(`${esito}\nPunteggio: ${json.punteggio}/30\nRisposte corrette: ${json.risposteCorrette}/${json.totaleDomande}`);
+      esameAttivo = null;
+      show('dash-studente');
+      await caricaRisultati();
+    } catch (e) {
+      alert('Errore di rete, riprova.'); console.error(e);
+    }
+  }
+
+  // ── RISULTATI STUDENTE ──
+  async function caricaRisultati() {
+    try {
+      const res = await fetch(`/api/risultati?studenteId=${currentUser.email}`);
+      const json = await res.json();
+      if (!json.success) return;
+
+      const tbody = document.getElementById('tbody-risultati-studente');
+      if (!tbody) return;
+      if (json.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--gray)">Nessun esame sostenuto ancora</td></tr>';
+        return;
+      }
+      tbody.innerHTML = json.data.map(r => `
+        <tr>
+          <td>${corsiData.find(c => c.id === r.corsoId)?.titolo || 'Corso ' + r.corsoId}</td>
+          <td>${r.punteggio}/30</td>
+          <td>${new Date(r.dataOra).toLocaleDateString('it-IT')}</td>
+          <td><span class="badge ${r.superato ? 'badge-green' : 'badge-red'}">${r.superato ? 'Superato' : 'Non superato'}</span></td>
+        </tr>`).join('');
+    } catch (e) { console.error('Errore caricamento risultati:', e); }
+  }
+
+  // ── RISULTATI DOCENTE ──
+  async function caricaRisultatiDocente() {
+    try {
+      const res = await fetch('/api/risultati');
+      const json = await res.json();
+      if (!json.success) return;
+
+      const tbody = document.getElementById('tbody-risultati-docente');
+      if (!tbody) return;
+      if (json.data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:var(--gray)">Nessun esame sostenuto ancora</td></tr>';
+        return;
+      }
+      tbody.innerHTML = json.data.map(r => `
+        <tr>
+          <td>${r.studenteNome}</td>
+          <td>${corsiData.find(c => c.id === r.corsoId)?.titolo || 'Corso ' + r.corsoId}</td>
+          <td>${r.punteggio}/30</td>
+          <td><span class="badge ${r.superato ? 'badge-green' : 'badge-red'}">${r.superato ? 'Superato' : 'Non superato'}</span></td>
+        </tr>`).join('');
+    } catch (e) { console.error('Errore caricamento risultati docente:', e); }
   }
 </script>
 </body>
