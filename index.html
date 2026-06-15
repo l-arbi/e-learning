@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>EduCloud — Piattaforma E-Learning</title>
+  <!-- Azure Application Insights -->
+  <script type="text/javascript">
+    !function(T,l,y){var S=T.location,k="script",D="instrumentationKey",C="ingestionendpoint",I="disableExceptionTracking",E="ai.device.",b="toLowerCase",w="crossOriginHeader",N="getElementById",O="addEventListener",H="XMLHttpRequest",P="DOMContentLoaded",j="SourceMap",A="Load",R="latency",U="//js.monitor.azure.com/scripts/b/ai.2.min.js",G=l.createElement(k);G.src=U;var V=l.getElementsByTagName(k)[0];V.parentNode.insertBefore(G,V);G.onload=function(){var g=T.appInsights||function(d){var n=function(o){T[d].queue&&T[d].queue.push(function(){var q={};return q[o]=function(){var a=arguments;return function(){T[d].queue.push(function(){T[d][o].apply(T[d],a)})}},q}());return T[d]||{config:{}}}("appInsights");n.config={instrumentationKey:"d4ed4b7e-4e98-4e9c-81c8-4935d8869158",enableAutoRouteTracking:true};T[d]=n;n.queue=[];n.version=2;n.trackPageView=function(){n.queue.push(function(){n.trackPageView.apply(n,arguments)})};n.trackPageView()}; g.trackPageView()};
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -660,6 +664,7 @@
         </tr>`).join('');
     } catch (e) { console.error('Errore caricamento risultati docente:', e); }
   }
+
 </script>
 </body>
 </html>
