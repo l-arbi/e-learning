@@ -299,10 +299,10 @@
       <p class="greeting">Ecco il riepilogo della tua formazione</p>
 
       <div class="stats">
-        <div class="stat-card"><div class="s-label">Corsi attivi</div><div class="s-val">3</div><div class="s-sub">Su 5 iscritto</div></div>
-        <div class="stat-card"><div class="s-label">Ore completate</div><div class="s-val">24</div><div class="s-sub">+4 questa settimana</div></div>
-        <div class="stat-card"><div class="s-label">Esami superati</div><div class="s-val">2</div><div class="s-sub">Media: 28/30</div></div>
-        <div class="stat-card"><div class="s-label">Certificati</div><div class="s-val">1</div><div class="s-sub">Scaricabile</div></div>
+        <div class="stat-card"><div class="s-label">Corsi attivi</div><div class="s-val" id="stat-corsi">—</div><div class="s-sub">Disponibili</div></div>
+        <div class="stat-card"><div class="s-label">Esami sostenuti</div><div class="s-val" id="stat-esami">—</div><div class="s-sub">Totale</div></div>
+        <div class="stat-card"><div class="s-label">Ultimo punteggio</div><div class="s-val" id="stat-punteggio">—</div><div class="s-sub">Su 30</div></div>
+        <div class="stat-card"><div class="s-label">Superati</div><div class="s-val" id="stat-superati">—</div><div class="s-sub">Su totale</div></div>
       </div>
 
       <div class="section-title">I miei corsi</div>
@@ -315,16 +315,7 @@
         </table>
       </div>
 
-      
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Esame</th><th>Data</th><th>Durata</th><th>Stato</th></tr></thead>
-          <tbody>
-            <tr><td>Cloud Computing — Modulo 2</td><td>20 Gen 2025</td><td>60 min</td><td><span class="badge badge-amber">Da sostenere</span></td></tr>
-            <tr><td>Cybersecurity — Esame Finale</td><td>28 Gen 2025</td><td>90 min</td><td><span class="badge badge-amber">Da sostenere</span></td></tr>
-          </tbody>
-        </table>
-      </div>
+
     </main>
   </div>
 </div>
@@ -514,6 +505,9 @@
     } catch (e) {
       console.error('Errore caricamento corsi:', e);
     }
+    // Aggiorna stat corsi
+    const statCorsi = document.getElementById('stat-corsi');
+    if (statCorsi) statCorsi.textContent = corsiData.length;
   }
 
   function renderCorsi() {
@@ -639,6 +633,16 @@
           <td>${new Date(r.dataOra).toLocaleDateString('it-IT')}</td>
           <td><span class="badge ${r.superato ? 'badge-green' : 'badge-red'}">${r.superato ? 'Superato' : 'Non superato'}</span></td>
         </tr>`).join('');
+      // Aggiorna statistiche
+      const totEsami = json.data.length;
+      const superati = json.data.filter(r => r.superato).length;
+      const ultimoPunteggio = totEsami > 0 ? json.data[totEsami-1].punteggio : '—';
+      const statEsami = document.getElementById('stat-esami');
+      const statPunteggio = document.getElementById('stat-punteggio');
+      const statSuperati = document.getElementById('stat-superati');
+      if (statEsami) statEsami.textContent = totEsami;
+      if (statPunteggio) statPunteggio.textContent = ultimoPunteggio;
+      if (statSuperati) statSuperati.textContent = superati + '/' + totEsami;
     } catch (e) { console.error('Errore caricamento risultati:', e); }
   }
 
